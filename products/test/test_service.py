@@ -47,7 +47,18 @@ def test_list_productis_when_empty(service_container):
 
     assert [] == listed_products
 
+def test_delete_product(create_product, service_container, redis_client):
 
+    stored_product = create_product()
+
+    with entrypoint_hook(service_container, 'delete') as delete:
+        deleted_product = delete(stored_product['id'])
+
+    product = redis_client.hgetall(f'products:{stored_product["id"]}')
+
+    assert stored_product == deleted_product
+    assert not product == True
+    
 def test_create_product(product, redis_client, service_container):
 
     with entrypoint_hook(service_container, 'create') as create:

@@ -47,6 +47,15 @@ def test_create(product, redis_client, storage):
         int(stored_product[b'passenger_capacity']))
     assert product['in_stock'] == int(stored_product[b'in_stock'])
 
+def test_delete(storage, redis_client, products):
+
+    product = storage.get('LZ129')
+
+    storage.delete(product['id'])
+
+    product = redis_client.hgetall(f'products:{product["id"]}')
+    
+    assert not product == True
 
 def test_decrement_stock(storage, create_product, redis_client):
     create_product(id=1, title='LZ 127', in_stock=10)

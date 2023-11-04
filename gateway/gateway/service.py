@@ -106,6 +106,11 @@ class GatewayService(object):
         # raise``OrderNotFound``
         order = self.orders_rpc.get_order(order_id)
 
+        order = self._retrieve_products_from_order(order)
+        
+        return order
+    
+    def _retrieve_products_from_order(self, order):
         # Retrieve all products from the products service
         product_map = {prod['id']: prod for prod in self.products_rpc.list()}
 
@@ -121,7 +126,32 @@ class GatewayService(object):
             item['image'] = '{}/{}.jpg'.format(image_root, product_id)
 
         return order
+    
+    @http("GET", "/orders", expected_exceptions=OrderNotFound)
+    def list_order(self, request):
+        """List the orders details.
 
+        Enhances the orders details with full product details from the
+        products-service.
+        """
+        orders = self._list_orders()
+        data = list()
+        for order in orders:
+            data.append(GetOrderSchema().dumps(order).data)
+        return Response(
+            data,
+            mimetype='application/json'
+        )
+    
+    def _list_orders(self):
+
+        orders = self.orders_rpc.list_orders()
+
+        for i in range(len(orders)):
+            orders[i] = self._retrieve_products_from_order(orders[i])
+        
+        return orders
+    
     @http(
         "POST", "/orders",
         expected_exceptions=(ValidationError, ProductNotFound, BadRequest)

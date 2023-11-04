@@ -23,6 +23,16 @@ class OrdersService:
         return OrderSchema().dump(order).data
 
     @rpc
+    def list_orders(self):
+        orders = self.db.query(Order)
+
+        data = list()
+        for order in orders:
+            data.append(OrderSchema().dump(order).data)
+        
+        return data
+    
+    @rpc
     def create_order(self, order_details):
         order = Order(
             order_details=[

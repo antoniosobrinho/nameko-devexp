@@ -53,6 +53,10 @@ ID=$(echo ${ORDER_ID} | jq '.id')
 echo "=== Getting Order ==="
 curl -s "${STD_APP_URL}/orders/${ID}" | jq .
 
+# Test: List Order
+echo "=== List Orders ==="
+curl -s "${STD_APP_URL}/orders" | jq .
+
 #Test: Delete Product
 echo "=== Deleting Product ==="
 curl -X DELETE "${STD_APP_URL}/products/the_odyssey"
